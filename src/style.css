@@ -209,7 +209,7 @@ main { width: 100%; max-width: 1600px; margin: auto; padding: 24px 40px 20px; fl
 .owned-outcome { margin: 10px 0 16px; color: var(--muted); line-height: 1.5; }
 .owned-outcome strong { color: var(--ink); margin-right: 4px; }
 .table-value { display: inline-flex; flex-wrap: nowrap; }
-.table-team .team-link, .goal-team .team-link { width: 144px; }
+.table-team .team-link, .goal-team .team-link { inline-size: max-content; min-inline-size: 11rem; flex: none; justify-content: flex-start; }
 .table-team .team-link-arrow, .goal-team .team-link-arrow { margin-left: auto; }
 :is(.metric-table tr, .company-goal)[data-team-status="below"] { --team-glow: var(--warning-tint); }
 :is(.metric-table tr, .company-goal)[data-team-status="vacant"] { --team-glow: var(--vacant-tint); }
@@ -436,7 +436,7 @@ fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 @media (min-width: 961px) and (max-width: 1100px) {
   .metric-table-wrap { padding-left: 8px; padding-right: 8px; }
   .metric-table th, .metric-table td { padding-left: 8px; padding-right: 8px; }
-  .team-link { gap: 6px; padding-left: 8px; padding-right: 8px; }
+  .editor-team-link { gap: 6px; padding-left: 8px; padding-right: 8px; }
   .table-avatar { display: none; }
   .table-number { font-size: 18px; }
 }
