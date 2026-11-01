@@ -323,7 +323,7 @@ function renderChart() {
   $('#nodes').innerHTML = positions.map(({ role, x, y, width: nodeWidth, depth }) => {
     const count = descendants(roles, role.id).length;
     const canOpen = !expanded && role.id !== root.id && count > 0;
-    return `<div class="chart-node ${canOpen ? 'has-reports' : ''} ${expanded && depth > 0 ? 'nested-node' : ''}" style="left:${x}px;top:${y}px;width:${nodeWidth}px">${(!expanded && role.id !== root.id) || (expanded && role.id === root.id) ? `<span class="department-caption">${esc(role.department)}</span>` : ''}${roleCard(role)}${canOpen ? `<button class="open-team" data-team="${esc(role.id)}" aria-label="View direct reports: ${esc(role.title)}"><span class="report-count">${count}</span>Team<span class="team-chevron" aria-hidden="true">›</span></button>` : ''}</div>`;
+    return `<div class="chart-node ${canOpen ? 'has-reports' : ''} ${expanded && depth > 0 ? 'nested-node' : ''}" style="left:${x}px;top:${y}px;width:${nodeWidth}px">${(!expanded && role.id !== root.id) || (expanded && role.id === root.id) ? `<span class="department-caption">${esc(role.department)}</span>` : ''}${roleCard(role)}${canOpen ? `<button class="open-team" data-team="${esc(role.id)}" aria-label="View team: ${esc(role.title)}"><span class="report-count">${count}</span>on team<span class="team-chevron" aria-hidden="true">›</span></button>` : ''}</div>`;
   }).join('');
   $('#nodes').querySelectorAll('[data-open]').forEach(button => button.onclick = () => showEditor(roles.find(r => r.id === button.dataset.open)));
   document.querySelectorAll('[data-team]').forEach(button => button.onclick = () => showTeam(button.dataset.team));
