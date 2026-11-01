@@ -2,6 +2,16 @@ import { DEMO_GOALS_VERSION, seedRoles } from './domain.js';
 
 export const statusText = { met: 'Target met', below: 'Below target', missing: 'Missing data', vacant: 'Vacant' };
 export const metricStatusText = (status, metric) => status === 'below' && metric.direction === 'lower' ? 'Over limit' : statusText[status];
+const decimals = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
+const singular = { days: 'day', weeks: 'week', videos: 'video', ads: 'ad', partners: 'partner', templates: 'template', concepts: 'concept', customers: 'customer' };
+export function measure(value, unit = '') {
+  if (!Number.isFinite(value)) return '—';
+  const n = decimals.format(value);
+  if (unit === '$') return '$' + n;
+  if (unit === '%' || unit === '×') return n + unit;
+  return unit ? n + ' ' + (value === 1 ? singular[unit] || unit : unit) : n;
+}
+export const unitLabel = unit => unit ? ' (' + (unit === '$' ? 'USD' : unit) + ')' : '';
 export function issueText(issue) {
   if (issue.status === 'vacant') return 'No employee assigned';
   const metric = issue.metric;
@@ -11,11 +21,9 @@ export function issueText(issue) {
     const fields = [!metric.name?.trim() && 'metric name', !Number.isFinite(metric.current) && 'actual', !Number.isFinite(metric.target) && 'target'].filter(Boolean);
     return `${label}: missing ${fields.join(', ')}`;
   }
-  const format = value => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value);
-  const unit = metric.unit ? ` ${metric.unit}` : '';
   return metric.direction === 'lower'
-    ? `${label}: ${format(metric.current)}${unit} (limit: ${format(metric.target)}${unit})`
-    : `${label}: ${format(metric.current)} of ${format(metric.target)}${unit}`;
+    ? `${label}: ${measure(metric.current, metric.unit)} (limit: ${measure(metric.target, metric.unit)})`
+    : `${label}: ${measure(metric.current, ['$', '%', '×'].includes(metric.unit) ? metric.unit : '')} of ${measure(metric.target, metric.unit)}`;
 }
 // Historical Russian defaults are kept solely to migrate existing browser saves.
 const departments = { Leadership: 'Руководство', Marketing: 'Маркетинг', Operations: 'Операции', Finance: 'Финансы' };

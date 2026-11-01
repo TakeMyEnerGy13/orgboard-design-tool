@@ -2,7 +2,9 @@
 
 A working org design tool for Forma, a fictional e-commerce brand growing from $2M toward $5M in monthly revenue. Explore how 13 roles fit together, assign ownership and see where the founder needs to step in.
 
-[Download the narrated walkthrough](walkthrough/orgboard-walkthrough.mp4) · [English captions](walkthrough/captions.vtt)
+[![OrgBoard demo: a founder and three department leads on a reporting chart](walkthrough/poster.jpg)](https://raw.githubusercontent.com/TakeMyEnerGy13/orgboard-design-tool/main/walkthrough/orgboard-walkthrough.mp4)
+
+[Watch the narrated walkthrough](https://raw.githubusercontent.com/TakeMyEnerGy13/orgboard-design-tool/main/walkthrough/orgboard-walkthrough.mp4) · [English captions](walkthrough/captions.vtt)
 
 ## A two-minute tour
 

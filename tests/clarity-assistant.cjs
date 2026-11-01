@@ -69,14 +69,14 @@ async function discussFromBoard(page, roleId) {
     });
     await check('clean and reverted drafts disable save; plans have no duplicate factual readouts', async () => {
       await page.locator('[data-metric-role="cmo"] .table-owner').click();
-      await expect(page.getByRole('tab', { name: 'Plans', exact: true })).toHaveAttribute('aria-selected', 'true');
+      await expect(page.getByRole('tab', { name: 'Targets', exact: true })).toHaveAttribute('aria-selected', 'true');
       await page.getByRole('tab', { name: 'Results', exact: true }).click();
       await expect(page.locator('#kpi-performance .section-heading h3')).toHaveText('Blended ROAS');
       const save = page.locator('#save-role'); await expect(save).toBeDisabled();
       await page.locator('[data-start-edit="kpi"]').click();
       await page.locator('[name="kpiCurrent"]').fill('3.2'); await expect(save).toBeEnabled();
       await page.locator('[name="kpiCurrent"]').fill('3.8'); await expect(save).toBeDisabled();
-      await page.getByRole('tab', { name: 'Plans', exact: true }).click();
+      await page.getByRole('tab', { name: 'Targets', exact: true }).click();
       await expect(page.locator('#goals-view .metric-progress, #goals-view .fact-value')).toHaveCount(0);
       await expect(page.locator('[name="kpiTarget"]')).toHaveValue('3.5');
       await page.screenshot({ path: path.join(output, 'role-plans-clear.png') });
@@ -232,7 +232,7 @@ async function discussFromBoard(page, roleId) {
       await page.locator('[data-metric-role="ops"] .table-owner').click();
       await expect(page.locator('#personal-status')).toHaveText('Target met');
       const discuss = page.getByRole('button', { name: 'Discuss with AI', exact: true });
-      await page.getByRole('tab', { name: 'Plans', exact: true }).click();
+      await page.getByRole('tab', { name: 'Targets', exact: true }).click();
       await expect(discuss).not.toBeVisible();
       await page.getByRole('tab', { name: 'Results', exact: true }).click();
       await page.screenshot({ path: path.join(output, 'role-results-discuss.png') });
@@ -242,7 +242,7 @@ async function discussFromBoard(page, roleId) {
       await expect(page.locator('#editor')).not.toBeVisible();
       await expect(page.locator('#subject-label')).toHaveText('James Wilson · Head of Operations');
       await expect(page.locator('.assistant-composer .composer-subject')).toContainText('James Wilson');
-      await expect(page.locator('.topic-metric dd')).toHaveText(['98 %', '97 %']);
+      await expect(page.locator('.topic-metric dd')).toHaveText(['98%', '97%']);
       await expect(page.locator('.topic-metric .status-badge')).toHaveText('Target met');
       await expect(page.locator('#assistant-prompt')).toBeFocused();
       await expect(page.locator('.assistant-message')).toHaveCount(0);
@@ -261,7 +261,7 @@ async function discussFromBoard(page, roleId) {
       await expect(page.locator('#editor')).not.toBeVisible();
       await expect(page.locator('#assistant-prompt')).toBeFocused();
       await expect(page.locator('#assistant-prompt')).toHaveValue(nextStep);
-      await expect(page.locator('.topic-metric dd').first()).toHaveText('98 %');
+      await expect(page.locator('.topic-metric dd').first()).toHaveText('98%');
       assert.equal(await page.evaluate(() => localStorage.getItem('orgboard.forma.v1')), previousData);
       await page.setViewportSize({ width: 390, height: 844 });
       await expect(page.getByRole('button', { name: 'View results', exact: true })).toBeInViewport();

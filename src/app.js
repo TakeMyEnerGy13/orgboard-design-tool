@@ -1,5 +1,5 @@
 import { STORAGE_KEY, DEMO_GOALS_VERSION, metricStatus, roleStatus, roleIssues, children, descendants, ancestors, teamHealth, managerOptions, saveRole, removeRole, serialize, readOrganization, seedRoles } from './domain.js';
-import { metricStatusText, issueText, localizeDemo, errorText } from './locale.js';
+import { metricStatusText, issueText, localizeDemo, errorText, measure, unitLabel } from './locale.js';
 import { esc, number, statusIcon, statusContent, statusBadge, metricProgress, readout, editValueIcon, fieldPencil, editableField } from './ui.js';
 import { picker, mountPickers } from './picker.js';
 import { createAssistant } from './assistant.js';
@@ -28,7 +28,7 @@ try {
   loadError = true;
   storageError = 'Your saved data could not be opened. This is a sample; your data has not been replaced.';
 }
-const assistant = createAssistant({ getRoles: () => roles, formatNumber: number, renderStatus: statusBadge, openRole: id => { const role = roles.find(item => item.id === id); if (role) showEditor(role); }, applyRoles: next => {
+const assistant = createAssistant({ getRoles: () => roles, renderStatus: statusBadge, openRole: id => { const role = roles.find(item => item.id === id); if (role) showEditor(role); }, applyRoles: next => {
   if (loadError) throw new Error('Your saved data could not be opened. Restore your team data first.');
   try { localStorage.setItem(STORAGE_KEY, serialize(next)); } catch { throw new Error('Your browser blocked saving. No changes were applied.'); }
   roles = next; storageError = ''; render(); notify('Changes saved');
@@ -70,12 +70,22 @@ function teamControl(role) {
   const teamStatus = team.below.length ? 'below' : team.missing.length ? 'missing' : team.vacant.length ? 'vacant' : 'met';
   return { teamStatus, teamButton: `<button class="button team-link" data-open-team="${esc(role.id)}" data-status="${teamStatus}" title="${esc(teamNotes.join(' · ') || 'All team targets met')}" aria-label="Open team: ${esc(role.title)}. ${esc(teamNotes.join(' · ') || 'All clear')}">${statusIcon('team')}<span>${teamNotes.length ? 'Review team' : 'Open'}</span><svg class="team-link-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5 5 5-5 5"/></svg></button>` };
 }
+function goalAlert(role) {
+  if (!role.employee || !role.objective) return '';
+  const status = metricStatus(role.objective.result);
+  if (status === 'met') return '';
+  return `<button type="button" class="goal-alert" data-open="${esc(role.id)}" data-open-view="goals" data-goal-focus="objective" title="${esc(role.objective.title)}">${status === 'below' ? 'Goal below target' : 'Goal missing data'} <span aria-hidden="true">›</span></button>`;
+}
+function tableMeasure(value, unit) {
+  const symbol = ['$', '%', '×'].includes(unit);
+  return `<span class="table-number">${esc(measure(value, symbol ? unit : ''))}</span>${!symbol && unit ? `<small>${esc(unit)}</small>` : ''}`;
+}
 function metricsTable() {
   return `<div class="metric-table-wrap"><table class="metric-table"><thead><tr><th scope="col">Role and employee</th><th scope="col">Metric</th><th scope="col">Actual</th><th scope="col">Target</th><th scope="col">KPI status</th><th scope="col">Team</th></tr></thead><tbody>${roles.map(role => {
       const status = role.employee ? metricStatus(role.kpi) : 'vacant';
       const { teamButton, teamStatus } = teamControl(role);
       const initials = role.employee.trim().split(/\s+/).slice(0, 2).map(part => Array.from(part)[0]).join('').toUpperCase();
-      return `<tr data-metric-role="${esc(role.id)}" data-status="${status}" data-team-status="${teamStatus}"><td data-label="Role"><button class="table-owner" data-open="${esc(role.id)}" data-open-view="goals" data-goal-focus="kpi" aria-label="Open plan: ${esc(role.kpi.name || role.title)} — ${esc(role.employee || role.title)}"><span class="table-avatar" aria-hidden="true">${role.employee ? esc(initials) : statusIcon('vacant')}</span><span class="table-identity"><strong>${esc(role.title)}</strong><span class="table-person">${esc(role.employee || 'Vacant')}</span></span></button></td><td data-label="Metric"><span class="table-metric-name">${esc(role.kpi.name || 'Not set')}</span><small>${esc(role.department)}</small></td><td data-label="Actual"><button class="fact-value table-value" data-open="${esc(role.id)}" data-edit-current="kpi" aria-label="Update actual: ${esc(role.title)}"><span><strong class="table-number">${number(role.kpi.current)}</strong><small>${esc(role.kpi.unit)}</small></span>${editValueIcon}</button></td><td data-label="Target" class="table-target"><span class="table-number">${role.kpi.direction === 'lower' ? '≤ ' : ''}${number(role.kpi.target)}</span><small>${esc(role.kpi.unit)}</small></td><td data-label="KPI status" class="table-status">${statusBadge(status, '', metricStatusText(status, role.kpi))}</td><td data-label="Team" class="table-team">${teamButton || '<span class="no-team" aria-label="No direct reports">—</span>'}</td></tr>`;
+      return `<tr data-metric-role="${esc(role.id)}" data-status="${status}" data-team-status="${teamStatus}"><td data-label="Role"><button class="table-owner" data-open="${esc(role.id)}" data-open-view="goals" data-goal-focus="kpi" aria-label="View target: ${esc(role.kpi.name || role.title)} — ${esc(role.employee || role.title)}"><span class="table-avatar" aria-hidden="true">${role.employee ? esc(initials) : statusIcon('vacant')}</span><span class="table-identity"><strong>${esc(role.title)}</strong><span class="table-person">${esc(role.employee || 'Vacant')}</span></span></button></td><td data-label="Metric"><span class="table-metric-name">${esc(role.kpi.name || 'Not set')}</span><small>${esc(role.department)}</small></td><td data-label="Actual"><button class="fact-value table-value" data-open="${esc(role.id)}" data-edit-current="kpi" aria-label="Update actual: ${esc(role.title)}"><span>${tableMeasure(role.kpi.current, role.kpi.unit)}</span>${editValueIcon}</button></td><td data-label="Target" class="table-target">${role.kpi.direction === 'lower' ? '≤ ' : ''}${tableMeasure(role.kpi.target, role.kpi.unit)}</td><td data-label="KPI status" class="table-status">${statusBadge(status, '', metricStatusText(status, role.kpi))}${goalAlert(role)}</td><td data-label="Team" class="table-team">${teamButton || '<span class="no-team" aria-label="No direct reports">—</span>'}</td></tr>`;
     }).join('')}</tbody></table></div>`;
 }
 function performanceCards(items) {
@@ -85,11 +95,12 @@ function performanceCards(items) {
     return `<article class="company-goal performance-surface" data-goal-role="${esc(role.id)}" data-goal-kind="${kind}" data-status="${status}" ${teamButton ? `data-team-status="${teamStatus}"` : ''}>
       <div class="goal-description">
         <div class="goal-heading"><h2>${esc(title)}</h2>${statusBadge(status, '', metricStatusText(status, metric))}</div>
+        ${primary ? goalAlert(role) : ''}
         <div class="goal-owner-row">
           <p class="goal-owner">${esc(role.employee || 'Vacant')}<span>${esc(role.title)}</span></p>
           <div class="goal-actions">
             ${teamButton ? `<div class="goal-team">${teamButton}</div>` : ''}
-            <button class="button secondary goal-open" data-open="${esc(role.id)}" data-open-view="goals" data-goal-focus="${kind}" aria-label="${primary ? 'Open plan' : 'Open goal'}: ${esc(title)} — ${esc(role.employee || role.title)}">${primary ? 'Open plan' : 'Open goal'}<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5 5 5-5 5"/></svg></button>
+            <button class="button secondary goal-open" data-open="${esc(role.id)}" data-open-view="goals" data-goal-focus="${kind}" aria-label="${primary ? 'View target' : 'Open goal'}: ${esc(title)} — ${esc(role.employee || role.title)}">${primary ? 'View target' : 'Open goal'}<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5 5 5-5 5"/></svg></button>
           </div>
         </div>
       </div>
@@ -185,7 +196,7 @@ function render() {
     const menu = $('.demo-menu');
     menu.open = false;
     menu.querySelector('summary').focus({ preventScroll: true });
-    confirmAction({ title: 'Restore demo?', body: '<p>Your changes to this demo team will be replaced with the original data.</p>', label: 'Restore', destructive: true, action: () => { loadError = false; focusId = null; persist(localizeDemo(seedRoles())); render(); notify(storageError || 'Demo restored'); } });
+    confirmAction({ title: 'Restore demo?', body: '<p>Your changes to this demo team will be replaced with the original data.</p>', label: 'Restore', destructive: true, action: () => { loadError = false; focusId = null; assistant.resetSelection(); persist(localizeDemo(seedRoles())); render(); notify(storageError || 'Demo restored'); } });
   };
   assistant.mount(page === 'assistant');
   if (page !== 'structure') return;
@@ -323,7 +334,7 @@ function renderChart() {
   $('#nodes').innerHTML = positions.map(({ role, x, y, width: nodeWidth, depth }) => {
     const count = descendants(roles, role.id).length;
     const canOpen = !expanded && role.id !== root.id && count > 0;
-    return `<div class="chart-node ${canOpen ? 'has-reports' : ''} ${expanded && depth > 0 ? 'nested-node' : ''}" style="left:${x}px;top:${y}px;width:${nodeWidth}px">${(!expanded && role.id !== root.id) || (expanded && role.id === root.id) ? `<span class="department-caption">${esc(role.department)}</span>` : ''}${roleCard(role)}${canOpen ? `<button class="open-team" data-team="${esc(role.id)}" aria-label="View team: ${esc(role.title)}"><span class="report-count">${count}</span>on team<span class="team-chevron" aria-hidden="true">›</span></button>` : ''}</div>`;
+    return `<div class="chart-node ${canOpen ? 'has-reports' : ''} ${expanded && depth > 0 ? 'nested-node' : ''}" style="left:${x}px;top:${y}px;width:${nodeWidth}px">${(!expanded && role.id !== root.id) || (expanded && role.id === root.id) ? `<span class="department-caption">${esc(role.department)}</span>` : ''}${roleCard(role)}${canOpen ? `<button class="open-team" data-team="${esc(role.id)}" aria-label="View team: ${esc(role.title)}"><span class="report-count">${count}</span>on the team<span class="team-chevron" aria-hidden="true">›</span></button>` : ''}</div>`;
   }).join('');
   $('#nodes').querySelectorAll('[data-open]').forEach(button => button.onclick = () => showEditor(roles.find(r => r.id === button.dataset.open)));
   document.querySelectorAll('[data-team]').forEach(button => button.onclick = () => showTeam(button.dataset.team));
@@ -394,7 +405,7 @@ function showEditor(existing, options = {}) {
   editor.innerHTML = `<form id="role-form" novalidate>
     <header class="editor-header"><div><h2 id="editor-title">${existing ? esc(role.title) : 'New role'}</h2><div class="editor-assignee"><span id="editor-person"></span><button type="button" class="button secondary config-action" id="assign-employee"></button></div></div><button type="button" class="button quiet icon-only" id="close-editor" aria-label="Close">×</button></header>
     <div class="segments editor-tabs" role="tablist" aria-label="Role details">
-      ${[['result', 'Results'], ['goals', 'Plans'], ['role', 'Role']].map(([id, label]) => `<button type="button" role="tab" id="tab-${id}" data-editor-view="${id}" aria-controls="${id}-view" aria-selected="false" tabindex="-1">${label}</button>`).join('')}
+      ${[['result', 'Results'], ['goals', 'Targets'], ['role', 'Role']].map(([id, label]) => `<button type="button" role="tab" id="tab-${id}" data-editor-view="${id}" aria-controls="${id}-view" aria-selected="false" tabindex="-1">${label}</button>`).join('')}
     </div>
     <div class="editor-content">
       <div id="result-view" role="tabpanel" aria-labelledby="tab-result">
@@ -402,6 +413,7 @@ function showEditor(existing, options = {}) {
       ${issues.length ? `<button type="button" class="button team-link editor-team-link" data-status="${teamStatus}" id="show-team-issues">${statusIcon('team')}<span>${teamMessage}</span><svg class="team-link-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7 5 5 5-5"/></svg></button>` : ''}
       ${existing ? '<button type="button" class="button secondary config-action discuss-role" id="discuss-role"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-5 3v-3a2 2 0 0 1-1-2V5a2 2 0 0 1 2-2Z"/><path d="M7 7h6m-6 3h4"/></svg>Discuss with AI</button></div>' : ''}
       ${metricPanel(role.kpi, 'kpi')}
+      ${role.outcome ? `<p class="owned-outcome"><strong>Owns</strong> ${esc(role.outcome)}</p>` : ''}
       <div id="objective-summary" ${role.objective ? '' : 'hidden'}>${metricPanel(role.objective?.result || blankMetric(), 'kr')}</div>
       ${issues.length ? `<section class="team-section" aria-labelledby="team-issues-title"><div class="team-section-heading"><h3 id="team-issues-title">Team alerts</h3><span class="team-issue-count" aria-label="Needs attention: ${issues.length}">${issues.length}</span></div><div class="team-issues">${issues.map(r => `<button type="button" class="team-issue" data-issue="${esc(r.id)}" data-status="${roleStatus(r)}" aria-label="Open role: ${esc(r.title)}. ${esc(r.employee ? `${r.employee}. ` : '')}${esc(roleIssues(r).map(issueText).join("; "))}"><span class="team-issue-identity"><span class="team-issue-title">${esc(r.title)}</span>${r.employee ? `<span class="team-issue-person">${esc(r.employee)}</span>` : ''}</span><span class="team-issue-reasons">${roleIssues(r).map(issue => `<span>${esc(issueText(issue))}</span>`).join('')}</span><svg class="team-issue-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5 5 5-5 5"/></svg></button>`).join('')}</div></section>` : ''}
       </div>
@@ -410,7 +422,7 @@ function showEditor(existing, options = {}) {
       <section class="goal-section"><button type="button" class="button secondary" id="add-objective" aria-controls="objective-config" ${role.objective ? 'hidden' : ''}>Add goal</button>
       <div id="objective-config" role="group" aria-label="Additional goal" tabindex="-1" ${role.objective ? '' : 'hidden'}>
         <label class="check-field goal-switch"><span>Additional goal</span><input type="checkbox" name="hasObjective" ${role.objective ? 'checked' : ''}></label>
-        <fieldset id="objective-fields" ${role.objective ? '' : 'hidden disabled'}>${editableField('Goal', 'objectiveTitle', role.objective?.title || '', { required: true, placeholder: 'What outcome do you want to achieve', className: 'goal-field goal-title-field' })}${metricSettings(role.objective?.result || blankMetric(), 'kr')}<p class="field-help">This goal also contributes to the team’s status.</p></fieldset>
+        <fieldset id="objective-fields" ${role.objective ? '' : 'hidden disabled'}>${editableField('Goal', 'objectiveTitle', role.objective?.title || '', { required: true, placeholder: 'What outcome do you want to achieve?', className: 'goal-field goal-title-field' })}${metricSettings(role.objective?.result || blankMetric(), 'kr')}<p class="field-help">This goal also contributes to the team’s status.</p></fieldset>
       </div></section>
       </div>
       <div id="role-view" role="tabpanel" aria-labelledby="tab-role" hidden>${identityFields(role, isRoot)}</div>
@@ -496,13 +508,13 @@ function showEditor(existing, options = {}) {
     for (const prefix of ['kpi', 'kr']) {
       const current = form.elements[`${prefix}Current`].value, target = form.elements[`${prefix}Target`].value;
       const metric = { name: form.elements[`${prefix}Name`].value, current: current === '' ? null : Number(current), target: target === '' ? null : Number(target), unit: form.elements[`${prefix}Unit`].value, direction: form.elements[`${prefix}Direction`].value };
-      const status = employee ? metricStatus(metric) : 'vacant', unit = metric.unit ? `, ${metric.unit}` : '';
+      const status = employee ? metricStatus(metric) : 'vacant', unit = unitLabel(metric.unit);
       const badge = $(prefix === 'kpi' ? '#personal-status' : '#objective-summary-status');
       badge.className = `status-badge ${status}`; badge.innerHTML = statusContent(status, metricStatusText(status, metric));
       $(`#${prefix}-performance`).dataset.status = status;
       $(`#${prefix}-title`).textContent = prefix === 'kpi' ? metric.name || 'No metric set' : form.elements.objectiveTitle.value || 'New goal';
       $(`#${prefix}-fact-label`).textContent = `Actual${unit}`;
-      $(`#${prefix}-plan-label`).textContent = `Target${metric.direction === 'lower' ? ' ≤' : ''}${unit}`;
+      $(`#${prefix}-plan-label`).textContent = `${metric.direction === 'lower' ? 'Limit' : 'Target'}${unit}`;
       $(`#${prefix}-fact`).textContent = number(metric.current); $(`#${prefix}-plan`).textContent = number(metric.target);
       $(`#${prefix}-progress`).innerHTML = metricProgress(metric, employee);
     }
@@ -574,7 +586,7 @@ function identityFields(role, isRoot) {
     <div class="identity-details">${detailField('Role title', 'title', role.title, 'For example, Designer')}${detailField('Department', 'department', role.department, 'Department name')}</div>
     ${picker({ id: 'manager', name: 'managerId', label: 'Reports to', value: role.managerId, options: roleChoices(managers), identity: true, icon: statusIcon('team'), disabled: isRoot, emptyLabel: 'Company leader' })}
     <div class="department-hint" id="department-hint" hidden><p>Manager’s department: <strong id="manager-department"></strong></p><button type="button" class="button secondary config-action" id="use-manager-department">Use for this role</button></div>
-    ${editableField('What outcome does this role own', 'outcome', role.outcome, { multiline: true, placeholder: 'For example, video ads ready to launch', className: 'goal-field goal-outcome-field' })}
+    ${editableField('What outcome does this role own?', 'outcome', role.outcome, { multiline: true, placeholder: 'For example, video ads ready to launch', className: 'goal-field goal-outcome-field' })}
     ${roles.some(r => r.id === role.id) ? `<div class="remove-row"><button type="button" class="button danger delete-role" id="delete-role" ${isRoot ? 'disabled' : ''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5"/></svg>Delete role</button>${isRoot ? '<p class="field-help">You can edit the company leader but cannot remove the role.</p>' : ''}</div>` : ''}</div>`;
 }
 function deleteRoleDialog(role) {

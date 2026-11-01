@@ -1,5 +1,5 @@
 import { metricStatus } from './domain.js';
-import { statusText } from './locale.js';
+import { statusText, measure, unitLabel } from './locale.js';
 
 export const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const number = value => Number.isFinite(value) ? new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value) : '—';
@@ -8,10 +8,10 @@ export const editValueIcon = '<svg class="edit-value-icon" viewBox="0 0 16 16" a
 function metricNote(metric, employee = true) {
   if (!employee) return 'Assign an employee to assess this role';
   if (metricStatus(metric) === 'missing') return 'The target or actual is missing';
-  const delta = metric.current - metric.target, unit = metric.unit ? ` ${metric.unit}` : '';
+  const delta = metric.current - metric.target;
   if (!delta) return 'Exactly on target';
-  if (metric.direction === 'lower') return delta > 0 ? `Over the limit by ${number(delta)}${unit}` : `Under the limit by ${number(-delta)}${unit}`;
-  return delta < 0 ? `Remaining to target: ${number(-delta)}${unit}` : `Above target by ${number(delta)}${unit}`;
+  if (metric.direction === 'lower') return delta > 0 ? `Over the limit by ${measure(delta, metric.unit)}` : `Under the limit by ${measure(-delta, metric.unit)}`;
+  return delta < 0 ? `Remaining to target: ${measure(-delta, metric.unit)}` : `Above target by ${measure(delta, metric.unit)}`;
 }
 export function statusIcon(status) {
   const paths = {
@@ -42,13 +42,12 @@ export function metricProgress(metric, employee = true) {
   const scale = (Math.max(metric.current, metric.target) || 1) * 1.25;
   const actual = metric.current / scale * 100, target = metric.target / scale * 100;
   const percent = metric.target > 0 ? `${number(metric.current / metric.target * 100)}%` : null;
-  const unit = metric.unit ? ` ${metric.unit}` : '';
-  const description = `Actual: ${number(metric.current)}${unit}. ${targetLabel}: ${number(metric.target)}${unit}. ${metricNote(metric)}`;
-  return `<div class="metric-progress" role="img" aria-label="${esc(description)}" style="--actual-position:${actual}%;--target-position:${target}%"><div class="progress-heading"><span>${percent ? heading : `${targetLabel} — 0`}</span><strong>${esc(percent || `${number(metric.current)}${unit}`)}</strong></div><div class="progress-plot" aria-hidden="true"><div class="progress-overflow"></div><div class="progress-rail"><span class="progress-fill"></span></div><span class="progress-target"></span><span class="progress-actual"></span></div></div>`;
+  const description = `Actual: ${measure(metric.current, metric.unit)}. ${targetLabel}: ${measure(metric.target, metric.unit)}. ${metricNote(metric)}`;
+  return `<div class="metric-progress" role="img" aria-label="${esc(description)}" style="--actual-position:${actual}%;--target-position:${target}%"><div class="progress-heading"><span>${percent ? heading : `${targetLabel} — 0`}</span><strong>${esc(percent || `${measure(metric.current, metric.unit)}`)}</strong></div><div class="progress-plot" aria-hidden="true"><div class="progress-overflow"></div><div class="progress-rail"><span class="progress-fill"></span></div><span class="progress-target"></span><span class="progress-actual"></span></div></div>`;
 }
 export function readout(metric, employee = true, edit = '') {
   const status = employee ? metricStatus(metric) : 'vacant';
-  return `<div class="metric-readout" data-status="${status}"><div class="metric-pair"><div><span class="value-label">Actual${metric.unit ? `, ${esc(metric.unit)}` : ''}</span>${edit ? `<button type="button" class="fact-value" ${edit}><strong>${number(metric.current)}</strong>${editValueIcon}</button>` : `<strong>${number(metric.current)}</strong>`}</div><div><span class="value-label">Target${metric.direction === 'lower' ? ' ≤' : ''}${metric.unit ? `, ${esc(metric.unit)}` : ''}</span><strong>${number(metric.target)}</strong></div></div>${metricProgress(metric, employee)}</div>`;
+  return `<div class="metric-readout" data-status="${status}"><div class="metric-pair"><div><span class="value-label">Actual${esc(unitLabel(metric.unit))}</span>${edit ? `<button type="button" class="fact-value" ${edit}><strong>${number(metric.current)}</strong>${editValueIcon}</button>` : `<strong>${number(metric.current)}</strong>`}</div><div><span class="value-label">${metric.direction === 'lower' ? 'Limit' : 'Target'}${esc(unitLabel(metric.unit))}</span><strong>${number(metric.target)}</strong></div></div>${metricProgress(metric, employee)}</div>`;
 }
 
 export const fieldPencil = '<svg class="identity-pencil" viewBox="0 0 20 20" aria-hidden="true"><path d="m12 4 4 4M4 12l9-9a2.8 2.8 0 0 1 4 4l-9 9-5 1 1-5Z"/></svg>';

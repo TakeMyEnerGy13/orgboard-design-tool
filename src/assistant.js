@@ -1,7 +1,7 @@
 import { prepareChanges } from './assistant-domain.js';
 import { bindDictation } from './dictation.js';
 import { metricStatus, roleIssues, roleStatus, teamHealth } from './domain.js';
-import { errorText, issueText, metricStatusText } from './locale.js';
+import { errorText, issueText, measure, metricStatusText } from './locale.js';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
 const arrow = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 10 5-5 5 5M10 5v11"/></svg>';
@@ -103,16 +103,16 @@ function topicHeader(role) {
       <button type="button" id="clear-subject" class="button quiet topic-clear" aria-label="Remove the selected role and return to the team">Back to team</button>
     </div></header>`;
 }
-function topicMetric(role, formatNumber, renderStatus) {
+function topicMetric(role, renderStatus) {
   const metric = role.kpi, status = role.employee ? metricStatus(metric) : 'vacant';
-  const value = amount => Number.isFinite(amount) ? [formatNumber(amount), metric.unit].filter(Boolean).join(' ') : '—';
+  const value = amount => measure(amount, metric.unit);
   return `<section class="topic-metric" aria-label="Primary KPI for this role">
     <div class="topic-metric-name"><span>Primary KPI</span><strong>${esc(metric.name || 'No metric set')}</strong></div>
     <dl><div><dt>Actual</dt><dd>${esc(value(metric.current))}</dd></div><div><dt>${metric.direction === 'lower' ? 'Limit' : 'Target'}</dt><dd>${esc(value(metric.target))}</dd></div></dl>
     ${renderStatus(status, '', metricStatusText(status, metric))}
   </section>`;
 }
-export function createAssistant({ getRoles, applyRoles, openRole, formatNumber, renderStatus }) {
+export function createAssistant({ getRoles, applyRoles, openRole, renderStatus }) {
   let messages = [], draft = '', busy = false, failure = '', controller;
   let requestsOpen = false, employeesOpen = false, employeeQuery = '';
   let subjectId = null, focusOnArrival = false;
@@ -197,7 +197,7 @@ export function createAssistant({ getRoles, applyRoles, openRole, formatNumber, 
       <div class="assistant-scroll">
         <section id="request-shelf" class="request-shelf" ${hasThread && !requestsOpen ? 'hidden' : ''} aria-label="Suggestions">
           ${welcome ? '<h2 class="assistant-greeting">Hello! What would you like to work on?</h2>' : ''}
-          ${subject ? topicMetric(subject, formatNumber, renderStatus) : ''}
+          ${subject ? topicMetric(subject, renderStatus) : ''}
           ${requestsMarkup(requests, busy)}
         </section>
         <div class="assistant-conversation" role="log" aria-label="Conversation with the assistant" aria-live="polite">${conversation}${busy ? '<p class="assistant-thinking" role="status">Reading team data…</p>' : ''}</div>
@@ -297,6 +297,7 @@ export function createAssistant({ getRoles, applyRoles, openRole, formatNumber, 
   }
   return {
     discussRole,
+    resetSelection() { subjectId = null; employeeQuery = ''; employeesOpen = false; },
     mount(isPage) {
       if (!isPage) { cancelDictation?.(); cancelDictation = null; return; }
       render(focusOnArrival);

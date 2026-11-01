@@ -27,7 +27,7 @@ const check = async (name, action) => { await action(); results.push(name); cons
   const open = async id => { await reveal(id); await page.locator(`[data-role-id="${id}"]`).click(); };
   const save = async () => page.getByRole('button', { name: 'Save', exact: true }).click();
   const settings = async () => page.getByRole('tab', { name: 'Role', exact: true }).click();
-  const goals = async () => page.getByRole('tab', { name: 'Plans', exact: true }).click();
+  const goals = async () => page.getByRole('tab', { name: 'Targets', exact: true }).click();
   const resultTab = async () => page.getByRole('tab', { name: 'Results', exact: true }).click();
   const fact = async (value, prefix = 'kpi', target = page) => {
     const button = target.locator(`[data-start-edit="${prefix}"]`);
@@ -54,7 +54,7 @@ const check = async (name, action) => { await action(); results.push(name); cons
       await expect(page.locator('.period, .page-heading p, #fit-chart, .organization #chart-path')).toHaveCount(0);
       await expect(page.locator('[data-role-id="ops"]')).toHaveAttribute('data-tone', 'healthy');
       await expect(page.locator('[data-role-id="cmo"]')).toHaveAttribute('data-tone', 'warning');
-      await expect(page.locator('.open-team[data-team="cmo"]')).toHaveText('6Team›');
+      await expect(page.locator('.open-team[data-team="cmo"]')).toHaveText('6on the team›');
       await expect(page.locator('.role-result, .team-note, .own-status')).toHaveCount(0);
       await expect(page.locator('[data-role-id="cmo"] .role-signal')).toHaveAttribute('data-hint', 'Team target not met');
       await expect(page.locator('#chart-back')).toBeHidden();
@@ -537,7 +537,7 @@ const check = async (name, action) => { await action(); results.push(name); cons
         assert(await markerOrder('#kpi-progress') < 0, 'Shortfall remains before the plan marker');
         await fact('3.5', 'kpi', scalePage);
         assert(Math.abs(await markerOrder('#kpi-progress')) < 1, 'Exact achievement aligns with the plan marker');
-        await scalePage.getByRole('tab', { name: 'Plans', exact: true }).click();
+        await scalePage.getByRole('tab', { name: 'Targets', exact: true }).click();
         await scalePage.locator('[name="kpiTarget"]').fill('0');
         await scalePage.getByRole('tab', { name: 'Results', exact: true }).click();
         await expect(scalePage.locator('#kpi-progress')).toContainText('Target — 0');
@@ -585,7 +585,7 @@ const check = async (name, action) => { await action(); results.push(name); cons
         await popupPage.keyboard.press('Shift+Tab');
         if (await popupPage.evaluate(() => document.activeElement === document.body)) await popupPage.keyboard.press('Shift+Tab');
         await expect(popupPage.locator('#cancel-edit')).toBeFocused();
-        await popupPage.getByRole('tab', { name: 'Plans', exact: true }).click();
+        await popupPage.getByRole('tab', { name: 'Targets', exact: true }).click();
         await expect(popupPage.locator('[name="kpiTarget"]')).toHaveValue('3.5');
         await expect(popupPage.locator('#goals-view .metric-progress')).toHaveCount(0);
         await popupPage.screenshot({ path: path.join(output, 'employee-popup.png') });
@@ -712,7 +712,7 @@ const check = async (name, action) => { await action(); results.push(name); cons
       try {
         await visitWorkspace(directionPage, url + '/#metrics');
         await directionPage.locator('[data-metric-role="editor"] .table-owner').click();
-        await directionPage.getByRole('tab', { name: 'Plans', exact: true }).click();
+        await directionPage.getByRole('tab', { name: 'Targets', exact: true }).click();
         await expect(directionPage.locator('select')).toHaveCount(0);
         const kpi = directionPage.locator('#kpi-direction-trigger');
         const kr = directionPage.locator('#kr-direction-trigger');
@@ -724,11 +724,11 @@ const check = async (name, action) => { await action(); results.push(name); cons
         await kpi.press('ArrowDown'); await kpi.press('End'); await kpi.press('Enter');
         await expect(directionPage.locator('#personal-status')).toHaveText('Target met');
         await directionPage.getByRole('tab', { name: 'Role', exact: true }).click();
-        await directionPage.getByRole('tab', { name: 'Plans', exact: true }).click();
+        await directionPage.getByRole('tab', { name: 'Targets', exact: true }).click();
         await expect(directionPage.locator('[name="kpiDirection"]')).toHaveValue('lower');
         await directionPage.getByRole('tab', { name: 'Role', exact: true }).click();
-        await expect(directionPage.getByRole('textbox', { name: 'What outcome does this role own', exact: true })).toBeVisible();
-        await directionPage.getByRole('tab', { name: 'Plans', exact: true }).click();
+        await expect(directionPage.getByRole('textbox', { name: 'What outcome does this role own?', exact: true })).toBeVisible();
+        await directionPage.getByRole('tab', { name: 'Targets', exact: true }).click();
         await directionPage.locator('.editor-content').evaluate(node => { node.scrollTop = 0; });
         await directionPage.screenshot({ path: path.join(output, 'goal-fields-1440.png') });
         for (const [width, height] of [[1440, 1000], [390, 844]]) {
@@ -761,7 +761,7 @@ const check = async (name, action) => { await action(); results.push(name); cons
         const saved = await directionPage.evaluate(() => JSON.parse(localStorage.getItem('orgboard.forma.v1')).roles.find(role => role.id === 'editor'));
         assert.equal(saved.kpi.direction, 'lower'); assert.equal(saved.objective.result.direction, 'lower');
         await directionPage.locator('[data-metric-role="editor"] .table-owner').click();
-        await directionPage.getByRole('tab', { name: 'Plans', exact: true }).click();
+        await directionPage.getByRole('tab', { name: 'Targets', exact: true }).click();
         await expect(directionPage.locator('#kpi-direction-current')).toHaveText('Lower');
       } finally { await directionContext.close(); }
     });
@@ -818,6 +818,12 @@ const check = async (name, action) => { await action(); results.push(name); cons
         const tableButton = goalsPage.getByRole('button', { name: 'Table', exact: true });
         await expect(tableButton).toHaveAttribute('aria-pressed', 'true');
         await expect(goalsPage.locator('.metric-table tbody tr')).toHaveCount(13);
+        const finance = goalsPage.locator('[data-metric-role="finance"]');
+        await expect(finance.locator('.status-badge')).toHaveText('Target met');
+        await finance.getByRole('button', { name: 'Goal below target' }).click();
+        await expect(goalsPage.locator('[name="objectiveTitle"]')).toHaveValue('Build a 13-week cash forecast');
+        await expect(goalsPage.locator('#objective-config')).toBeFocused();
+        await goalsPage.locator('#close-editor').click();
         for (const width of [1440, 1024, 961, 960, 901, 872, 851, 390]) {
           await goalsPage.setViewportSize({ width, height: 1000 });
           assert(await goalsPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Table must fit at ${width}px`);
@@ -963,7 +969,7 @@ const check = async (name, action) => { await action(); results.push(name); cons
         assert.equal(await numericPage.evaluate(() => JSON.parse(localStorage.getItem('orgboard.forma.v1')).roles.find(role => role.id === 'cmo').kpi.current), 3.5);
         await numericPage.locator('[data-team="cmo"]').click();
         await numericPage.locator('[data-role-id="editor"]').click();
-        await numericPage.getByRole('tab', { name: 'Plans', exact: true }).click();
+        await numericPage.getByRole('tab', { name: 'Targets', exact: true }).click();
         const target = numericPage.locator('[name="krTarget"]');
         await target.fill(''); await target.pressSequentially('-');
         await numericPage.getByRole('tab', { name: 'Results', exact: true }).click();
@@ -1003,13 +1009,13 @@ const check = async (name, action) => { await action(); results.push(name); cons
         await reviewPage.getByRole('tab', { name: 'Results', exact: true }).click();
         await reviewPage.locator('[data-start-edit="kr"]').click();
         await expect(reviewPage.locator('[name="krCurrent"]')).toBeFocused();
-        await reviewPage.getByRole('tab', { name: 'Plans', exact: true }).click();
+        await reviewPage.getByRole('tab', { name: 'Targets', exact: true }).click();
         await reviewPage.locator('[name="kpiName"]').fill('');
         await reviewPage.getByRole('tab', { name: 'Results', exact: true }).click();
         await expect(reviewPage.locator('#kpi-progress .progress-empty')).toHaveText('Add metric name');
         await expect(reviewPage.locator('#kpi-fact')).toHaveText('20');
         await expect(reviewPage.locator('#kpi-plan')).toHaveText('20');
-        await reviewPage.getByRole('tab', { name: 'Plans', exact: true }).click();
+        await reviewPage.getByRole('tab', { name: 'Targets', exact: true }).click();
         await reviewPage.locator('[name="kpiName"]').fill('Video ads delivered');
         await reviewPage.getByRole('tab', { name: 'Role', exact: true }).click();
         await reviewPage.locator('[name="title"]').fill('   ');
@@ -1090,7 +1096,8 @@ const check = async (name, action) => { await action(); results.push(name); cons
       try {
         await visitWorkspace(auditPage, url + '/#metrics');
         await expect(auditPage.getByRole('columnheader', { name: 'KPI status', exact: true })).toBeVisible();
-        await expect(auditPage.locator('[data-metric-role="editor"] .table-status')).toHaveText('Target met');
+        await expect(auditPage.locator('[data-metric-role="editor"] .table-status .status-badge')).toHaveText('Target met');
+        await expect(auditPage.locator('[data-metric-role="editor"] .goal-alert')).toHaveText(/Goal below target/);
         await expect(auditPage.locator('[data-open-team="cmo"]')).toHaveAttribute('data-status', 'below');
         await auditPage.getByRole('link', { name: 'Structure', exact: true }).click();
         await auditPage.locator('[data-role-id="ceo"]').click();

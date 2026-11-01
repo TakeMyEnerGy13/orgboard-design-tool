@@ -205,6 +205,9 @@ main { width: 100%; max-width: 1600px; margin: auto; padding: 24px 40px 20px; fl
 .table-value, .table-target { white-space: nowrap; }
 .table-value small, .table-target small { display: inline-block; margin: 0 0 0 6px; }
 .table-target .table-number { color: var(--muted); font-weight: 600; }
+.goal-alert { display: block; position: relative; z-index: 2; width: fit-content; margin-top: 4px; padding: 4px 2px; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 13px; font-weight: 650; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.owned-outcome { margin: 10px 0 16px; color: var(--muted); line-height: 1.5; }
+.owned-outcome strong { color: var(--ink); margin-right: 4px; }
 .table-value { display: inline-flex; flex-wrap: nowrap; }
 .table-team .team-link, .goal-team .team-link { width: 144px; }
 .table-team .team-link-arrow, .goal-team .team-link-arrow { margin-left: auto; }
