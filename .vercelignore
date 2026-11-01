@@ -1,0 +1,7 @@
+artifacts/
+docs/
+tests/
+.env
+.env.*
+dist/
+*.log

@@ -1,0 +1,29 @@
+/* Layout of the catalogue only. The examples use product components. */
+.specimen main { display: block; max-width: 1240px; margin: 0 auto; padding-block: clamp(32px, 5vw, 72px); }
+.specimen h1 { font-size: clamp(36px, 5vw, 64px); letter-spacing: -.055em; line-height: 1.1; }
+.kit-intro, .kit-section header p { color: var(--muted); line-height: 1.65; }
+.kit-intro { margin: var(--space-3) 0 var(--space-8); max-width: 56ch; }
+.kit-section { display: grid; grid-template-columns: minmax(200px, 1fr) minmax(0, 2.4fr); gap: clamp(24px, 5vw, 72px); align-items: start; padding-block: var(--space-8); border-top: 1px solid var(--line); }
+.kit-index { font-size: var(--type-label); font-variant-numeric: tabular-nums; color: var(--muted); }
+.kit-section h2 { margin-block: 4px 8px; font-size: 23px; font-weight: 700; line-height: 1.25; letter-spacing: -.035em; }
+.kit-section header p, .kit-feedback { font-size: var(--type-action); }
+.kit-actions, .kit-states { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.kit-actions { padding-top: var(--space-1); }
+.kit-feedback { color: var(--muted); margin-top: var(--space-3); }
+.kit-feedback:empty { display: none; }
+.kit-example { margin-top: var(--space-3); padding: clamp(16px, 3vw, 28px); }
+.kit-example h3 { margin: 0; font-size: 22px; line-height: 1.35; letter-spacing: -.035em; }
+.kit-example-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-6); }
+.kit-settings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+.kit-settings .button { justify-self: start; }
+.kit-palette, .kit-spec { display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-6); }
+.kit-palette span { font-size: var(--type-label); color: var(--muted); }
+.kit-palette span::before { content: ''; display: block; height: 32px; width: 52px; margin-bottom: 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--swatch); }
+.kit-spec { margin: var(--space-6) 0 0; }
+.kit-spec dt { color: var(--muted); font-size: var(--type-label); }
+.kit-spec dd { margin: 4px 0 0; font-size: var(--type-action); font-weight: 700; }
+@media (max-width: 760px) {
+  .kit-section { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); padding-block: var(--space-6); }
+  .kit-section header p { max-width: 56ch; }
+  .kit-settings { grid-template-columns: 1fr; }
+}

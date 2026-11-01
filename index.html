@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000d10">
+  <meta name="description" content="Structure, ownership and performance in one view.">
+  <title>OrgBoard — Team</title>
+  <link rel="preload" href="./src/fonts/Manrope-Variable.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='32' fill='%23000d10'/%3E%3Ctext x='12' y='46' font-size='44' font-family='Arial' fill='white'%3Eo%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./src/ui-kit.css">
+  <link rel="stylesheet" href="./src/style.css">
+  <link rel="stylesheet" href="./src/help.css">
+  <script type="module" src="./src/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Skip to workspace</a>
+  <div id="app"></div>
+  <dialog id="editor"></dialog>
+  <dialog id="dialog"></dialog>
+  <button id="open-faq" class="button primary icon-only" type="button" popovertarget="faq-panel" aria-haspopup="dialog" aria-label="Frequently asked questions">?</button>
+  <aside id="faq-panel" popover="auto" role="dialog" aria-labelledby="faq-title">
+    <header class="faq-heading"><h2 id="faq-title">Frequently asked questions</h2><button type="button" class="button quiet icon-only" aria-label="Close help" popovertarget="faq-panel" popovertargetaction="hide">×</button></header>
+    <details name="faq" id="faq-structure"><summary>How do I assign someone to a role?</summary><p>Open a vacant role on the chart and choose Assign employee. Enter a name and save. To change who they report to, open the Role tab.</p></details>
+    <details name="faq" id="faq-colors"><summary>What do the card colors mean?</summary><p>Green means targets are met. Red highlights a missed personal target; orange means someone on the team missed theirs. Gray means data is missing, and purple marks a vacancy. Open Results to see why.</p></details>
+    <details name="faq" id="faq-results"><summary>How do I update a KPI?</summary><p>In Metrics, select the actual value with the pencil, enter a new value and save. The chart updates for the employee and their managers. Output targets must be reached; cost limits must not be exceeded. Status compares values and does not measure lateness.</p></details>
+    <details name="faq" id="faq-assistant"><summary>How do I ask AI about an employee?</summary><p>In Results, choose Discuss with AI. Their name will appear in the composer. Ask about their performance or request a change. You can review the proposal before applying it.</p></details>
+    <button id="faq-guide" class="button secondary compact" type="button">Take the tour <span aria-hidden="true">→</span></button>
+  </aside>
+  <dialog id="onboarding" aria-labelledby="guide-title-1">
+    <header class="guide-top"><span class="wordmark">orgboard<span>®</span></span><button id="guide-skip" type="button" class="button quiet">Skip tour</button></header>
+    <div class="guide-pages">
+      <section class="guide-step" id="guide-structure">
+        <div class="guide-copy"><p class="guide-topic">Welcome to OrgBoard</p>
+          <h2 id="guide-title-1" tabindex="-1">Meet your team</h2>
+          <p class="guide-lead">Each card is a role. Follow the lines to see who reports to whom.</p>
+          <p><strong>Open a card</strong> to see the results that person owns. <strong>Team</strong> opens the whole branch under a manager.</p>
+          <p>To fill an open role, select its card and choose <strong>Assign employee</strong>.</p>
+        </div>
+        <figure class="guide-plate" aria-label="Sample team branch">
+          <div class="guide-tree">
+            <div class="guide-node guide-manager" style="--tone:var(--warning-tint)"><strong>Head of Creative</strong><span>Olivia Brooks</span><small>2 on the team <b aria-hidden="true">›</b></small></div>
+            <div class="guide-children">
+              <div class="guide-node" style="--tone:var(--healthy-tint)"><strong>Creative Strategist</strong><span>Mia Rodriguez</span></div>
+              <div class="guide-node" style="--tone:var(--risk-tint)"><strong>Video Editor</strong><span>Ethan Miller</span></div>
+            </div>
+          </div>
+        </figure>
+      </section>
+      <section class="guide-step" id="guide-colors" hidden>
+        <div class="guide-copy"><p class="guide-topic">Reading the chart</p>
+          <h2 id="guide-title-2" tabindex="-1">What the colors mean</h2>
+          <p class="guide-lead">The color in the corner tells you where to look.</p>
+          <p>For example, Ethan has delivered <strong>12 of 20 videos</strong>. His card is red. Olivia met her own target, but her card is orange because Ethan reports to her.</p>
+        </div>
+        <figure class="guide-plate" aria-label="Card color guide">
+          <ul class="guide-legend">
+            <li style="--tone:var(--healthy-tint)"><i></i><div><strong>Green</strong><span>Personal and team targets are met</span></div></li>
+            <li style="--tone:var(--risk-tint)"><i></i><div><strong>Red</strong><span>This person has not reached a target</span></div></li>
+            <li style="--tone:var(--warning-tint)"><i></i><div><strong>Orange</strong><span>Someone on this team has not reached a target</span></div></li>
+            <li style="--tone:var(--neutral-tint)"><i></i><div><strong>Gray</strong><span>This role or its team is missing metric data</span></div></li>
+            <li style="--tone:var(--vacant-tint)"><i></i><div><strong>Purple</strong><span>This role or a role on its team is vacant</span></div></li>
+          </ul>
+        </figure>
+      </section>
+      <section class="guide-step" id="guide-results" hidden>
+        <div class="guide-copy"><p class="guide-topic">Metrics and goals</p>
+          <h2 id="guide-title-3" tabindex="-1">Update a result</h2>
+          <p class="guide-lead">The target is the number to reach. The actual is what has been achieved so far.</p>
+          <p>In <strong>Metrics</strong> select the number with the pencil, update the actual and save. Open the card to review the plan. Additional objectives are listed under <strong>Goals</strong>.</p>
+        </div>
+        <figure class="guide-plate" aria-label="Try an example">
+          <div class="guide-demo"><div class="guide-demo-card"><span class="guide-person">Ethan Miller · Video Editor</span><h3>Video ads delivered</h3>
+            <div class="guide-values"><div><span>Actual</span><strong id="guide-fact">12</strong></div><div><span>Target</span><strong>20</strong></div></div>
+            <div class="guide-meter" aria-hidden="true"><i></i></div>
+            <p id="guide-effect" aria-live="polite">Ethan is below target. His manager has a team alert.</p>
+          </div><button id="guide-try" class="button secondary" type="button">Set actual to 20</button></div>
+        </figure>
+      </section>
+      <section class="guide-step" id="guide-assistant" hidden>
+        <div class="guide-copy"><p class="guide-topic">AI assistant</p>
+          <h2 id="guide-title-4" tabindex="-1">Discuss a role with AI</h2>
+          <p class="guide-lead">In Results, select Discuss with AI. The employee will be attached to your message.</p>
+          <p>Ask why a team is flagged or suggest a new target. Changes take effect only after you review and apply them.</p>
+        </div>
+        <figure class="guide-plate" aria-label="Sample conversation">
+          <div class="guide-phone">
+            <div class="guide-phone-screen">
+              <div class="phone-nav">
+                <span class="phone-app-mark" aria-hidden="true">o</span>
+                <div><small>OrgBoard</small><strong>AI assistant</strong></div>
+                <button class="phone-replay" type="button" aria-label="Replay sample conversation" title="Replay sample conversation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.8 9a7.8 7.8 0 1 1-.1 6m.1-11v5h5"/></svg></button>
+              </div>
+              <div class="phone-thread">
+                <p class="phone-question">Why is Olivia’s team flagged?</p>
+                <div class="phone-answer">
+                  <strong class="phone-author">OrgBoard</strong>
+                  <p>Olivia met her target. Ethan has delivered 12 of his 20 videos.</p>
+                </div>
+              </div>
+              <div class="phone-composer">
+                <span class="phone-person"><b aria-hidden="true">@</b> Olivia Brooks</span>
+                <div class="phone-entry" aria-hidden="true"><span class="phone-draft">Why is Olivia’s team flagged?</span><span class="phone-placeholder">Ask a follow-up…</span><svg viewBox="0 0 24 24"><path d="M12 18V6m-5 5 5-5 5 5"/></svg></div>
+              </div>
+              <div class="phone-keyboard" aria-hidden="true"></div>
+            </div>
+          </div>
+        </figure>
+      </section>
+    </div>
+    <footer class="guide-footer"><div class="guide-progress"><span id="guide-position" aria-live="polite"></span><div class="guide-track" aria-hidden="true"><i></i></div></div><div class="guide-actions"><button id="guide-back" class="button quiet" type="button" hidden>Back</button><button id="guide-next" class="button primary" type="button">Next</button></div></footer>
+  </dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

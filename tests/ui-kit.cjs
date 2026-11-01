@@ -1,0 +1,101 @@
+const { visitWorkspace } = require('./visit-workspace.cjs');
+const { chromium, expect } = require('playwright/test');
+const assert = require('node:assert/strict');
+const path = require('node:path');
+const url = process.env.TEST_URL || 'http://127.0.0.1:4188';
+const appearance = locator => locator.evaluate(el => {
+  const s = getComputedStyle(el);
+  return [s.minHeight, s.paddingInlineStart, s.paddingInlineEnd, s.borderRadius, s.fontFamily, s.fontSize, s.fontWeight, s.color, s.backgroundColor, s.backgroundImage, s.borderTopColor, s.boxShadow];
+});
+
+(async () => {
+  const browser = await chromium.launch({ executablePath: process.env.TEST_BROWSER });
+  try {
+    const context = await browser.newContext({ reducedMotion: 'reduce' });
+    const site = await context.newPage(), kit = await context.newPage(), errors = [];
+    for (const p of [site, kit]) p.on('pageerror', e => errors.push(e.message));
+    await kit.goto(url + '/src/ui-kit.html');
+    await visitWorkspace(site, url + '/#metrics');
+    await expect(kit.locator('#statuses .status-badge')).toHaveCount(4);
+    for (const width of [1440, 390]) {
+      for (const p of [site, kit]) await p.setViewportSize({ width, height: width === 390 ? 844 : 900 });
+      await site.locator('a[href="#metrics"]').click();
+      await site.getByRole('button', { name: 'Cards', exact: true }).click();
+      const card = site.locator('[data-goal-role="ceo"]');
+      await expect(site.getByText('Primary metrics', { exact: true })).toHaveCount(0);
+      await expect(card.getByText('Team', { exact: true })).toHaveCount(0);
+      await expect(card.getByText('Update', { exact: true })).toHaveCount(0);
+      await expect(card.locator('.fact-value .edit-value-icon')).toBeVisible();
+      await site.mouse.move(0, 0); await kit.mouse.move(0, 0);
+      assert.deepEqual(await appearance(site.locator('#add-role')), await appearance(kit.locator('#edit-fact')));
+      assert.deepEqual(await appearance(card.locator('.goal-open')), await appearance(kit.locator('#open-plan')));
+      const cards = site.locator('[data-metrics-view="cards"]');
+      assert.deepEqual(await appearance(cards), await appearance(kit.locator('[data-view="result"]')));
+      const team = await appearance(card.locator('.team-link'));
+      const tint = (locator, token) => locator.evaluate((el, name) => getComputedStyle(el).getPropertyValue(name).trim(), token);
+      const teamTint = await tint(card.locator('.team-link'), '--team-tint');
+      assert.equal(teamTint, await tint(card, '--warning-tint'));
+      assert.equal(teamTint, await tint(card, '--team-glow'));
+      await card.locator('.fact-value').click();
+      const current = site.locator('[name="kpiCurrent"]');
+      await expect(current).toBeFocused();
+      const original = await current.inputValue();
+      await current.fill('2100000');
+      await site.mouse.move(0, 0);
+      assert.deepEqual(await appearance(site.locator('#save-role')), await appearance(kit.locator('#edit-fact')));
+      assert.deepEqual(await appearance(site.locator('.editor-tabs [aria-selected="true"]')), await appearance(kit.locator('[data-view="result"]')));
+      await current.fill(original); await site.locator('#cancel-edit').click();
+      await site.getByRole('button', { name: 'Table', exact: true }).click();
+      await expect(site.locator('[data-metric-role="ceo"] .table-value .edit-value-icon')).toBeVisible();
+      assert.deepEqual(team, await appearance(site.locator('[data-metric-role="ceo"] .team-link')));
+      const editorBadge = site.locator('[data-metric-role="editor"] .status-badge');
+      assert.equal(await tint(editorBadge, '--badge-tint'), await tint(editorBadge, '--risk-tint'));
+      await editorBadge.click();
+      await expect(site.locator('#tab-goals')).toHaveAttribute('aria-selected', 'true');
+      await expect(site.locator('#kpi-config')).toBeFocused();
+      await site.keyboard.press('Escape');
+      await expect(site.locator('[data-metric-role="editor"] .table-owner')).toBeFocused();
+      await site.locator('[data-metric-role="editor"] .table-value').click();
+      await expect(current).toBeFocused();
+      await site.locator('#cancel-edit').click();
+      await site.locator('a[href="#structure"]').click();
+      await expect.poll(() => tint(site.locator('[data-role-id="cmo"] .role-signal'), '--badge-tint')).toBe(teamTint);
+      await site.locator('a[href="#goals"]').click();
+      await expect(site.getByText('Additional team goals', { exact: true })).toHaveCount(0);
+      await expect(site.locator('.company-goal').first()).toBeVisible();
+      await site.locator('a[href="#assistant"]').first().click();
+      const send = site.locator('.assistant-send');
+      await site.locator('#assistant-prompt').fill('');
+      await expect(send).toBeDisabled();
+      await expect(send).toHaveCSS('background-color', 'rgb(0, 0, 0)');
+      await expect(send).toHaveCSS('opacity', '1');
+      await site.locator('#assistant-prompt').fill('Team summary');
+      await site.mouse.move(0, 0);
+      await expect(send).toBeEnabled();
+      await expect(send).toHaveCSS('background-color', 'rgb(0, 0, 0)');
+      const primary = kit.locator('#edit-fact');
+      for (const property of ['min-height', 'padding-inline', 'border-radius', 'font', 'color', 'box-shadow']) {
+        await expect(send).toHaveCSS(property, await primary.evaluate((el, prop) => getComputedStyle(el).getPropertyValue(prop), property));
+      }
+      for (const p of [site, kit]) assert(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+      await kit.screenshot({ path: path.join(__dirname, '../artifacts', 'ui-kit-' + width + '.png'), fullPage: true });
+    }
+    await kit.locator('#edit-fact').focus(); await kit.keyboard.press('Enter');
+    await expect(kit.locator('#submit-dialog')).toBeDisabled();
+    await kit.getByRole('spinbutton').fill('21'); await kit.locator('#submit-dialog').click();
+    await expect(kit.locator('#example .status-badge')).toHaveText('Target met');
+    await kit.locator('#open-plan').click();
+    await kit.getByRole('combobox').click(); await kit.getByRole('option', { name: 'Lower' }).click();
+    await kit.getByRole('button', { name: 'Save plan' }).click();
+    await expect(kit.locator('#example .status-badge')).toHaveText('Over limit');
+    await kit.locator('#clear-fact').click(); await kit.keyboard.press('Escape');
+    await expect(kit.locator('#example .fact-value')).toHaveText('21');
+    await kit.locator('#clear-fact').click(); await kit.locator('#submit-dialog').click();
+    await expect(kit.locator('#example .status-badge')).toHaveText('Missing data');
+    await kit.locator('#restore').click();
+    await expect(kit.locator('#example .fact-value')).toHaveText('12');
+    assert.equal(await kit.evaluate(() => localStorage.getItem('orgboard.forma.v1')), null);
+    assert.deepEqual(errors, []);
+    console.log('PASS shared desktop/mobile controls, clean cards and goals, live kit edits, confirmation, reset and isolated sample data.');
+  } finally { await browser.close(); }
+})().catch(e => { console.error(e); process.exitCode = 1; });

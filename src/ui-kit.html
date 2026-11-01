@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UI kit · OrgBoard</title>
+  <link rel="stylesheet" href="./ui-kit.css">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./specimen.css">
+  <script type="module" src="./specimen.js"></script>
+</head>
+<body class="specimen">
+  <a class="skip-link" href="#components">Skip to components</a>
+  <header class="topbar"><span class="wordmark">orgboard<span>®</span></span><a class="button secondary" href="/#structure">Open OrgBoard</a></header>
+  <main id="components">
+    <h1>UI kit for OrgBoard</h1>
+    <p class="kit-intro">Buttons, fields and status indicators. Changes here affect only this example.</p>
+    <section class="kit-section" aria-labelledby="actions-title">
+      <header><span class="kit-index" aria-hidden="true">01</span><h2 id="actions-title">Actions</h2><p>Use the solid button for the main action, a light button for navigation and red for deletion.</p></header>
+      <div><div class="kit-actions">
+        <button type="button" class="button primary" id="edit-fact">Edit actual</button>
+        <button type="button" class="button secondary" id="open-plan">Open plan</button>
+        <button type="button" class="button quiet" id="restore">Reset example</button>
+        <button type="button" class="button danger" id="clear-fact">Clear actual</button>
+      </div><p class="kit-feedback" id="feedback" role="status"></p></div>
+    </section>
+    <section class="kit-section" aria-labelledby="data-title">
+      <header><span class="kit-index" aria-hidden="true">02</span><h2 id="data-title">Fields and metrics</h2><p>Select the actual value or open the plan. Changing a value updates the chart, status and card color.</p></header>
+      <div>
+        <div class="segments" role="group" aria-label="Example view"><button type="button" data-view="result" aria-pressed="true">Result</button><button type="button" data-view="plan" aria-pressed="false">Target</button></div>
+        <article id="example" class="performance-surface kit-example"></article>
+      </div>
+    </section>
+    <section class="kit-section" aria-labelledby="status-title">
+      <header><span class="kit-index" aria-hidden="true">03</span><h2 id="status-title">Statuses</h2><p>Each state has a text label and an icon. Personal results and team status are shown separately.</p></header>
+      <div class="kit-states" id="statuses"></div>
+    </section>
+    <section class="kit-section" aria-labelledby="base-title">
+      <header><span class="kit-index" aria-hidden="true">04</span><h2 id="base-title">Foundations</h2><p>Manrope for headings, actions and numbers. Neutral surfaces keep attention on status colors.</p></header>
+      <div><div class="kit-palette" aria-label="Interface colors"><span style="--swatch:var(--paper)">Background</span><span style="--swatch:var(--surface)">Card</span><span style="--swatch:var(--canvas)">Field</span><span style="--swatch:var(--line)">Border</span><span style="--swatch:var(--action-ink)">Action</span></div>
+      <dl class="kit-spec"><div><dt>Button</dt><dd>48 px</dd></div><div><dt>Compact</dt><dd>44 px</dd></div><div><dt>Button radius</dt><dd>14 px</dd></div><div><dt>Spacing</dt><dd>4 · 8 · 12 · 16 · 24 · 32</dd></div></dl></div>
+    </section>
+  </main>
+  <dialog id="dialog" aria-labelledby="dialog-title"><form id="sample-form"><h2 id="dialog-title"></h2><div class="dialog-body"></div><div class="dialog-actions"><button type="button" class="button secondary" id="cancel-dialog">Cancel</button><button type="submit" id="submit-dialog"></button></div></form></dialog>
+</body>
+</html>

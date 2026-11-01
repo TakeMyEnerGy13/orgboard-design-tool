@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="612" viewBox="0 0 300 612">
+  <defs>
+    <mask id="screen-cutout">
+      <rect width="300" height="612" fill="white"/>
+      <rect x="15" y="11.5" width="270" height="589" rx="37.5" fill="black"/>
+    </mask>
+    <linearGradient id="titanium" x1="0" y1="0" x2="1" y2=".25" gradientUnits="objectBoundingBox">
+      <stop stop-color="#6a6d70"/><stop offset=".018" stop-color="#e6e4df"/>
+      <stop offset=".08" stop-color="#9b9b98"/><stop offset=".37" stop-color="#edeae5"/>
+      <stop offset=".68" stop-color="#a8a6a2"/><stop offset=".94" stop-color="#dedcd7"/>
+      <stop offset=".988" stop-color="#898b8e"/><stop offset="1" stop-color="#4b4e52"/>
+    </linearGradient>
+    <linearGradient id="button" x2="1" y2="0">
+      <stop stop-color="#45494b"/><stop offset=".4" stop-color="#cccac5"/><stop offset="1" stop-color="#747675"/>
+    </linearGradient>
+    <radialGradient id="lens">
+      <stop stop-color="#34506e"/><stop offset=".6" stop-color="#182534"/><stop offset="1" stop-color="#0c1016"/>
+    </radialGradient>
+  </defs>
+  <!-- Side controls and the brushed outer rail. -->
+  <g fill="url(#button)" stroke="#676969" stroke-width=".6">
+    <rect x="2.5" y="107" width="5" height="21" rx="1.8"/>
+    <rect x="2" y="152" width="6" height="42" rx="2"/>
+    <rect x="2" y="202" width="6" height="42" rx="2"/>
+    <rect x="292" y="171" width="6" height="65" rx="2"/>
+  </g>
+  <g mask="url(#screen-cutout)">
+  <rect x="5" y="1.5" width="290" height="609" rx="47" fill="url(#titanium)" stroke="#585c60"/>
+  <rect x="6.6" y="3" width="286.8" height="606" rx="45.6" fill="none" stroke="#f0eee9" stroke-opacity=".78"/>
+  <path d="M5 77h4.3M291 77h4M5 536h4.3M291 536h4M231 2v4M69 606v4" fill="none" stroke="#757673" stroke-width="2.4"/>
+  <!-- Cover glass, recessed display, camera island and front speaker. -->
+  <rect x="9.7" y="6" width="280.6" height="600" rx="42.6" fill="#111315" stroke="#36383a"/>
+  </g>
+  <path d="M130 8h40" stroke="#383b3c" stroke-width="1.4" stroke-linecap="round"/>
+  <rect x="117" y="19" width="66" height="18" rx="9" fill="#090a0c"/>
+  <circle cx="173.5" cy="28" r="4.2" fill="url(#lens)"/>
+  <circle cx="172.7" cy="27" r=".85" fill="#8495a4" opacity=".65"/>
+  <!-- System status and home indicator are part of the illustration. -->
+  <g fill="#22282c">
+    <text x="41" y="33" font-family="system-ui, sans-serif" font-size="12" font-weight="700">9:41</text>
+    <path d="M213 30h2.5v3H213zM216.5 28h2.5v5h-2.5zM220 26h2.5v7H220zM223.5 24h2.5v9h-2.5z"/>
+    <path d="M230 27q5.4-5 10.8 0m-9 2q3.7-3.4 7.2 0m-5.4 2q1.8-1.7 3.6 0" fill="none" stroke="#22282c" stroke-width="1.35" stroke-linecap="round"/>
+    <rect x="245" y="25" width="13" height="7" rx="2" fill="none" stroke="#555a5c"/>
+    <rect x="246.6" y="26.5" width="9.7" height="4" rx="1"/>
+    <path d="M259.2 27v3" stroke="#555a5c" stroke-width="1.2" stroke-linecap="round"/>
+    <rect x="108" y="588" width="84" height="3.7" rx="1.85"/>
+  </g>
+</svg>

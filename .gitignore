@@ -1,0 +1,10 @@
+node_modules/
+artifacts/
+*.log
+.env
+.env.*
+!.env.example
+.vercel/
+dist/
+# Historical local review notes are not part of the public demo.
+docs/
