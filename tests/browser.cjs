@@ -1164,7 +1164,7 @@ const check = async (name, action) => { await action(); results.push(name); cons
           assert(await cardsPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
           assert(await cardsPage.locator('.goal-team .team-link').evaluateAll(buttons => buttons.every(button => {
             const bounds = button.getBoundingClientRect(), card = button.closest('article').getBoundingClientRect();
-            return Math.round(bounds.width) === 144 && bounds.height >= 44 && bounds.left >= card.left && bounds.right <= card.right;
+            return Math.round(bounds.width) >= 176 && bounds.height >= 44 && bounds.left >= card.left && bounds.right <= card.right;
           })));
           await cardsPage.screenshot({ path: path.join(output, `team-plan-cards-${width}.png`) });
           await card('ceo').click({ position: { x: 16, y: 16 } });
